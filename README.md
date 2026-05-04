@@ -60,7 +60,7 @@ Text("welcome_title")
 Use `GhostText` if you want the UI to update **instantly** without a view reload when a background sync completes:
 
 ```swift
-GhostText("welcome_title", default: "Welcome Guest")
+GhostText("welcome_title")
 ```
 
 ## Pull to Refresh

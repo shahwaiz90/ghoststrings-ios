@@ -1,26 +1,20 @@
 import SwiftUI
 
-/// A SwiftUI View that displays a string from GhostStrings.
-/// It automatically uses the OTA value if available, or falls back to the default.
 public struct GhostText: View {
+    @ObservedObject private var gs = GhostStrings.shared
     private let key: String
-    private let defaultValue: String
     
-    @ObservedObject private var ghostStrings = GhostStrings.shared
-    
-    public init(_ key: String, default defaultValue: String) {
+    public init(_ key: String) {
         self.key = key
-        self.defaultValue = defaultValue
     }
     
     public var body: some View {
-        Text(ghostStrings.get(key, defaultValue))
+        // Automatically falls back to NSLocalizedString if not in cloud
+        Text(gs.get(key, NSLocalizedString(key, comment: "")))
     }
 }
 
-/// Helper for when you need the string value directly (e.g. in an alert or picker)
-public extension View {
-    func ghostString(_ key: String, default defaultValue: String) -> String {
-        return GhostStrings.shared.get(key, defaultValue)
-    }
+/// Convenience helper for string-only usage
+public func ghostString(_ key: String) -> String {
+    return GhostStrings.shared.get(key, NSLocalizedString(key, comment: ""))
 }
