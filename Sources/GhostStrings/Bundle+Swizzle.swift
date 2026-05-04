@@ -20,22 +20,13 @@ extension Bundle {
     
     @objc func gs_localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
         // 1. Try to get from GhostStrings
-        // We only intercept for the main bundle to avoid breaking system frameworks
         if self == Bundle.main {
-            let gsValue = GhostStrings.shared.getSync(key)
-            if gsValue != key {
+            if let gsValue = GhostStrings.shared.getSync(key) {
                 return gsValue
             }
         }
         
-        // 2. Fallback to original implementation (which is now gs_localizedString due to exchange)
+        // 2. Fallback to original implementation
         return gs_localizedString(forKey: key, value: value, table: tableName)
-    }
-}
-
-extension GhostStrings {
-    /// Synchronous access for swizzling
-    func getSync(_ key: String) -> String {
-        return strings[key] ?? key
     }
 }

@@ -1,11 +1,10 @@
 import Foundation
 import Combine
 
-@MainActor
 public class GhostStrings: ObservableObject {
     public static let shared = GhostStrings()
     
-    @Published public private(set) var strings: [String: String] = [:]
+    @MainActor @Published public private(set) var strings: [String: String] = [:]
     private var threadSafeStrings: [String: String] = [:]
     private let lock = NSLock()
     
@@ -40,9 +39,12 @@ public class GhostStrings: ObservableObject {
     
     private func updateStrings(_ newStrings: [String: String]) {
         lock.lock()
-        defer { lock.unlock() }
         self.threadSafeStrings = newStrings
-        self.strings = newStrings
+        lock.unlock()
+        
+        Task { @MainActor in
+            self.strings = newStrings
+        }
     }
 
     /// Internal sync access for swizzling
@@ -53,7 +55,9 @@ public class GhostStrings: ObservableObject {
     }
 
     public func get(_ key: String, _ defaultValue: String) -> String {
-        return strings[key] ?? defaultValue
+        lock.lock()
+        defer { lock.unlock() }
+        return threadSafeStrings[key] ?? defaultValue
     }
     
     public func sync() async {
