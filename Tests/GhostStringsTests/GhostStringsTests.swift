@@ -15,7 +15,31 @@ final class GhostStringsTests: XCTestCase {
         let title = await GhostStrings.shared.get("hero_title", "Fallback")
         print("\nFetched Title: \(title)\n")
         
-        // Assert that we got something other than the fallback (assuming the server has data)
         XCTAssertNotEqual(title, "Fallback")
+    }
+    
+    func testConfigInitialization() {
+        let config = GhostStringsConfig(apiKey: "test_key", debugMode: true)
+        XCTAssertEqual(config.apiKey, "test_key")
+        XCTAssertTrue(config.debugMode)
+        XCTAssertEqual(config.baseUrl, "https://ghoststrings.com/api/") // Default
+    }
+    
+    func testFallbackLogic() async {
+        let config = GhostStringsConfig(apiKey: "test_key")
+        await GhostStrings.shared.initSDK(config: config)
+        
+        let value = await GhostStrings.shared.get("non_existent_key", "Default Value")
+        XCTAssertEqual(value, "Default Value")
+    }
+    
+    func testRepositoryStorage() {
+        let repo = GhostStringsRepository()
+        let testStrings = ["test_key": "test_value"]
+        
+        repo.saveStrings(testStrings)
+        let loaded = repo.getStrings()
+        
+        XCTAssertEqual(loaded["test_key"], "test_value")
     }
 }

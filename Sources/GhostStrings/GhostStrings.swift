@@ -25,8 +25,10 @@ public class GhostStrings: ObservableObject {
         // Detect first launch
         self.isFirstLaunch = cachedStrings.isEmpty
         
-        // Sync if needed
-        syncIfNeeded()
+        // Sync on launch
+        Task {
+            await sync()
+        }
     }
     
     public func get(_ key: String, _ defaultValue: String) -> String {
