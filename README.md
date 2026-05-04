@@ -1,13 +1,26 @@
 # GhostStrings iOS SDK
 
-A lightweight iOS SDK for Over-the-Air (OTA) translations, mirroring the GhostStrings Android functionality.
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS-blue.svg?style=flat)](https://developer.apple.com/ios/)
+[![Build Status](https://github.com/shahwaiz90/ghoststrings-ios/actions/workflows/swift.yml/badge.svg)](https://github.com/shahwaiz90/ghoststrings-ios/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Manage your app content instantly without re-submitting to the App Store.
+
+## Features
+
+- ⚡️ **Instant Updates**: Sync strings and translations in real-time.
+- 📦 **1KB Core**: Minimal footprint, maximum performance.
+- 🧵 **Thread Safe**: Fully Swift 6 Concurrency compliant.
+- 🛡️ **Offline First**: Stale-while-revalidate caching logic.
+- 🧩 **SwiftUI Native**: Easy-to-use `GhostText` components.
 
 ## Installation
 
 ### Swift Package Manager (SPM)
 
 1. In Xcode, go to **File** > **Add Packages...**
-2. Enter the URL of your GitHub repository.
+2. Paste the URL: `https://github.com/shahwaiz90/ghoststrings-ios`
 3. Select **Up to Next Major Version** and click **Add Package**.
 
 ## Usage
@@ -23,8 +36,8 @@ import GhostStrings
 struct MyApp: App {
     init() {
         GhostStrings.shared.initSDK(config: GhostStringsConfig(
-            apiKey: "YOUR_API_KEY",
-            baseUrl: "https://your-server.com/api/",
+            apiKey: "your_project_key",
+            baseUrl: "https://ghoststrings-787748748049.us-central1.run.app",
             debugMode: true
         ))
     }
@@ -52,23 +65,24 @@ struct ContentView: View {
             // otherwise "Welcome Guest"
             GhostText("welcome_title", default: "Welcome Guest")
                 .font(.largeTitle)
-            
-            Text(ghostString("subtitle", default: "Start exploring"))
         }
     }
 }
 ```
 
-## How to Publish
+## Pull to Refresh
 
-1. Push this `GhostStrings-iOS` folder to a new GitHub repository (or as a subfolder in your existing repo).
-2. Go to **Releases** on GitHub and create a new tag (e.g., `1.0.0`).
-3. That's it! SPM will now be able to find and install your library.
+To allow users to manually fetch the latest content:
 
-## API Parity with Android
+```swift
+ScrollView {
+    // Content
+}
+.refreshable {
+    await GhostStrings.shared.sync()
+}
+```
 
-- [x] Singleton `GhostStrings.shared`
-- [x] Persistence using `UserDefaults` (matches `SharedPreferences`)
-- [x] Stale-while-revalidate sync strategy
-- [x] Automatic first-launch application
-- [x] SwiftUI support (matches `Compose`)
+## License
+
+GhostStrings is available under the MIT license. See the LICENSE file for more info.
