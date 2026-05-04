@@ -14,7 +14,6 @@ A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Mana
 - 📦 **1KB Core**: Minimal footprint, maximum performance.
 - 🧵 **Thread Safe**: Fully Swift 6 Concurrency compliant.
 - 🛡️ **Offline First**: Stale-while-revalidate caching logic.
-- 🧩 **SwiftUI Native**: Easy-to-use `GhostText` components.
 
 ## Installation
 
@@ -28,8 +27,6 @@ A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Mana
 
 ### 1. Initialize the SDK
 
-In your `App` struct or `AppDelegate`:
-
 ```swift
 import GhostStrings
 
@@ -38,40 +35,29 @@ struct MyApp: App {
     init() {
         GhostStrings.shared.initSDK(config: GhostStringsConfig(
             apiKey: "your_project_key",
-            baseUrl: "https://ghoststrings-787748748049.us-central1.run.app",
-            debugMode: true
+            baseUrl: "https://your-server.com/api/"
         ))
     }
-
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
 }
 ```
 
-### 2. Use Native Components (Invisible Mode)
+### 2. Pick Your Integration Mode
 
-Because GhostStrings swizzles the native localization system, you can use standard SwiftUI or UIKit components without any changes:
+| Mode | Usage | Best For |
+| :--- | :--- | :--- |
+| **Invisible** | `Text("welcome_key")` | Legacy projects & standard native feeling. |
+| **Reactive** | `GhostText("welcome_key")` | Real-time updates while the user is on-screen. |
+
+#### Invisible Mode (Standard SwiftUI)
+Because GhostStrings swizzles the native localization system, you can use standard SwiftUI components without any changes:
 
 ```swift
-import SwiftUI
-
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            // This now automatically pulls from GhostStrings!
-            Text("welcome_title")
-                .font(.largeTitle)
-        }
-    }
-}
+// This automatically pulls from the cloud!
+Text("welcome_title")
 ```
 
-### 3. Use GhostText (Reactive Mode)
-
-If you need the UI to update **instantly** without a view reload when a sync completes:
+#### Reactive Mode (GhostText)
+Use `GhostText` if you want the UI to update **instantly** without a view reload when a background sync completes:
 
 ```swift
 GhostText("welcome_title", default: "Welcome Guest")
