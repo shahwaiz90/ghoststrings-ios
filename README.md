@@ -10,6 +10,7 @@ A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Mana
 ## Features
 
 - ⚡️ **Instant Updates**: Sync strings and translations in real-time.
+- 👻 **Invisible Mode**: Use native `Text()` and `NSLocalizedString()` with zero code changes.
 - 📦 **1KB Core**: Minimal footprint, maximum performance.
 - 🧵 **Thread Safe**: Fully Swift 6 Concurrency compliant.
 - 🛡️ **Offline First**: Stale-while-revalidate caching logic.
@@ -50,24 +51,30 @@ struct MyApp: App {
 }
 ```
 
-### 2. Use in SwiftUI
+### 2. Use Native Components (Invisible Mode)
 
-Use the `GhostText` view to automatically handle OTA updates:
+Because GhostStrings swizzles the native localization system, you can use standard SwiftUI or UIKit components without any changes:
 
 ```swift
 import SwiftUI
-import GhostStrings
 
 struct ContentView: View {
     var body: some View {
         VStack {
-            // This will show the value from the server if available, 
-            // otherwise "Welcome Guest"
-            GhostText("welcome_title", default: "Welcome Guest")
+            // This now automatically pulls from GhostStrings!
+            Text("welcome_title")
                 .font(.largeTitle)
         }
     }
 }
+```
+
+### 3. Use GhostText (Reactive Mode)
+
+If you need the UI to update **instantly** without a view reload when a sync completes:
+
+```swift
+GhostText("welcome_title", default: "Welcome Guest")
 ```
 
 ## Pull to Refresh
