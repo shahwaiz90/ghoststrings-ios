@@ -5,25 +5,32 @@ import Combine
 public class GhostStrings: ObservableObject {
     public static let shared = GhostStrings()
     
-    @Published private(set) var cachedStrings: [String: String] = [:]
+    @Published public private(set) var strings: [String: String] = [:]
+    private var threadSafeStrings: [String: String] = [:]
+    private let lock = NSLock()
     
     private var config: GhostStringsConfig?
-    private var repository = GhostStringsRepository()
     private var api: GhostStringsApi?
+    private let repository = GhostStringsRepository()
     
-    private var isFirstLaunch: Bool = false
+    public private(set) var isFirstLaunch: Bool = false
     
     private init() {}
     
-    public func initSDK(config: GhostStringsConfig) {
+    public func initSDK(config: GhostStringsConfig, swizzle: Bool = true) {
         self.config = config
         self.api = GhostStringsApi(config: config)
         
-        // Load existing strings
-        self.cachedStrings = repository.getStrings()
+        // Load from cache
+        let cachedStrings = repository.getStrings()
+        self.updateStrings(cachedStrings)
         
         // Detect first launch
         self.isFirstLaunch = cachedStrings.isEmpty
+        
+        if swizzle {
+            Bundle.swizzleLocalization()
+        }
         
         // Sync on launch
         Task {
@@ -31,23 +38,37 @@ public class GhostStrings: ObservableObject {
         }
     }
     
+    private func updateStrings(_ newStrings: [String: String]) {
+        lock.lock()
+        defer { lock.unlock() }
+        self.threadSafeStrings = newStrings
+        self.strings = newStrings
+    }
+
+    /// Internal sync access for swizzling
+    func getSync(_ key: String) -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+        return threadSafeStrings[key]
+    }
+
     public func get(_ key: String, _ defaultValue: String) -> String {
-        return cachedStrings[key] ?? defaultValue
+        return strings[key] ?? defaultValue
     }
     
     public func sync() async {
         guard let api = api else { return }
         
         do {
-            let strings = try await api.fetchStrings()
-            repository.saveStrings(strings)
+            let newStrings = try await api.fetchStrings()
             
-            if isFirstLaunch {
-                self.cachedStrings = strings
-            }
+            // Update memory and cache
+            self.updateStrings(newStrings)
+            self.repository.saveStrings(newStrings)
+            
         } catch {
             if config?.debugMode == true {
-                print("GhostStrings Sync Error: \(error.localizedDescription)")
+                print("GhostStrings: Sync failed - \(error)")
             }
         }
     }
