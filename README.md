@@ -1,8 +1,8 @@
 # GhostStrings iOS SDK
 
-[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
-[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS-blue.svg?style=flat)](https://developer.apple.com/ios/)
 [![Build Status](https://github.com/shahwaiz90/ghoststrings-ios/actions/workflows/swift.yml/badge.svg)](https://github.com/shahwaiz90/ghoststrings-ios/actions)
+[![Swift Package Index](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fshahwaiz90%2Fghoststrings-ios%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/shahwaiz90/ghoststrings-ios)
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Manage your app content instantly without re-submitting to the App Store.
