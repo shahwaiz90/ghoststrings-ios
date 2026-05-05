@@ -87,9 +87,11 @@ public class GhostStrings: ObservableObject {
                 // Update memory and cache
                 self.updateStrings(newStrings)
                 self.repository.saveStrings(newStrings, lastModified: result.lastModified)
+                self.trackEvent("ghost_sync_success")
             } else {
                 // 304 Not Modified — just update sync timestamp
                 self.repository.saveStrings(self.threadSafeStrings, lastModified: lastModified)
+                self.trackEvent("ghost_sync_cached")
             }
             
         } catch {
@@ -110,5 +112,15 @@ public class GhostStrings: ObservableObject {
                 await sync()
             }
         }
+    }
+    
+    private func trackEvent(_ eventName: String) {
+        let cid = repository.getLastModified()?.hashValue.description ?? UUID().uuidString
+        let pid = config?.projectId ?? "unknown"
+        let urlString = "https://www.google-analytics.com/g/collect?v=2&tid=G-8RCWG09F1R&cid=\(cid)&en=\(eventName)&ep.project_id=\(pid)"
+        
+        guard let url = URL(string: urlString) else { return }
+        
+        URLSession.shared.dataTask(with: url).resume()
     }
 }
