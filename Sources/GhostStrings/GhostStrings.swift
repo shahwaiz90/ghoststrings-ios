@@ -60,7 +60,11 @@ public class GhostStrings: ObservableObject {
         lock.unlock()
         
         Task { @MainActor in
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            if self.config?.enableAnimations == true {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    self.strings = newStrings
+                }
+            } else {
                 self.strings = newStrings
             }
             NotificationCenter.default.post(name: .GhostStringsDidUpdate, object: nil)
