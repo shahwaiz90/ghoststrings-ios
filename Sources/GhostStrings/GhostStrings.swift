@@ -16,6 +16,8 @@ public class GhostStrings: ObservableObject {
     private var threadSafeStrings: [String: String] = [:]
     private let lock = NSLock()
     
+    private var lastModified: String?
+    
     private var config: GhostStringsConfig?
     private var api: GhostStringsApi?
     private let repository = GhostStringsRepository()
@@ -36,6 +38,7 @@ public class GhostStrings: ObservableObject {
         
         // Load from cache
         let cachedStrings = repository.getStrings()
+        self.lastModified = repository.getLastModified()
         self.updateStrings(cachedStrings)
         
         // Detect first launch
@@ -81,10 +84,10 @@ public class GhostStrings: ObservableObject {
         guard let api = api else { return }
         
         do {
-            let lastModified = repository.getLastModified()
             let result = try await api.fetchStrings(ifModifiedSince: lastModified)
             
             if result.isModified, let newStrings = result.strings {
+                self.lastModified = result.lastModified
                 // Update memory and cache
                 self.updateStrings(newStrings)
                 self.repository.saveStrings(newStrings, lastModified: result.lastModified)
