@@ -80,11 +80,17 @@ public class GhostStrings: ObservableObject {
         guard let api = api else { return }
         
         do {
-            let newStrings = try await api.fetchStrings()
+            let lastModified = repository.getLastModified()
+            let result = try await api.fetchStrings(ifModifiedSince: lastModified)
             
-            // Update memory and cache
-            self.updateStrings(newStrings)
-            self.repository.saveStrings(newStrings)
+            if result.isModified, let newStrings = result.strings {
+                // Update memory and cache
+                self.updateStrings(newStrings)
+                self.repository.saveStrings(newStrings, lastModified: result.lastModified)
+            } else {
+                // 304 Not Modified — just update sync timestamp
+                self.repository.saveStrings(self.threadSafeStrings, lastModified: lastModified)
+            }
             
         } catch {
             if config?.debugMode == true {
