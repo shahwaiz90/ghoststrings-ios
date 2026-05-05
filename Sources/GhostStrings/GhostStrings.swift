@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 extension Notification.Name {
     public static let GhostStringsDidUpdate = Notification.Name("GhostStringsDidUpdate")
