@@ -5,9 +5,13 @@ extension Notification.Name {
     public static let GhostStringsDidUpdate = Notification.Name("GhostStringsDidUpdate")
 }
 
+/// The main entry point for the GhostStrings iOS SDK.
+/// This class handles initialization, cloud synchronization, and string management.
 public class GhostStrings: ObservableObject {
+    /// The shared singleton instance.
     public static let shared = GhostStrings()
     
+    /// The current set of strings fetched from the cloud.
     @MainActor @Published public private(set) var strings: [String: String] = [:]
     private var threadSafeStrings: [String: String] = [:]
     private let lock = NSLock()
@@ -16,10 +20,15 @@ public class GhostStrings: ObservableObject {
     private var api: GhostStringsApi?
     private let repository = GhostStringsRepository()
     
+    /// Returns true if this is the first time the SDK has been launched on this device.
     public private(set) var isFirstLaunch: Bool = false
     
     private init() {}
     
+    /// Initializes the SDK with the provided configuration.
+    /// - Parameters:
+    ///   - config: The configuration object containing projectId and baseUrl.
+    ///   - swizzle: If true, the SDK will automatically intercept native localization calls. Defaults to true.
     public func initSDK(config: GhostStringsConfig, swizzle: Bool = true) {
         self.config = config
         self.api = GhostStringsApi(config: config)
@@ -65,6 +74,8 @@ public class GhostStrings: ObservableObject {
         return threadSafeStrings[key] ?? defaultValue
     }
     
+    /// Synchronizes the local strings with the GhostStrings cloud.
+    /// This method is called automatically on initialization, but can be triggered manually.
     public func sync() async {
         guard let api = api else { return }
         

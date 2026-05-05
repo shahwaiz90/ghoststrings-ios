@@ -1,31 +1,27 @@
-# GhostStrings iOS SDK
+# GhostStrings iOS SDK 👻🍏
 
-[![Build Status](https://github.com/shahwaiz90/ghoststrings-ios/actions/workflows/swift.yml/badge.svg)](https://github.com/shahwaiz90/ghoststrings-ios/actions)
-[![Swift Package Index](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fshahwaiz90%2Fghoststrings-ios%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/shahwaiz90/ghoststrings-ios)
-[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)](https://developer.apple.com/swift/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+The "Invisible String" for your iOS apps. GhostStrings allows you to update your app's content Over-the-Air (OTA) with zero code changes, using standard Apple localization patterns.
 
-A lightweight, zero-dependency iOS SDK for Over-the-Air (OTA) translations. Manage your app content instantly without re-submitting to the App Store.
+## 🚀 Features
 
-## Features
+- **Zero-Code Swizzling**: Automatically intercepts `NSLocalizedString` calls via `Bundle` swizzling.
+- **SwiftUI Ready**: Includes `GhostStringsProvider` for automatic, seamless UI refreshes.
+- **Objective-C & Swift**: Works perfectly with both languages and all Apple UI frameworks.
+- **Offline First**: robust local caching ensures strings are always available even without internet.
 
-- ⚡️ **Instant Updates**: Sync strings and translations in real-time.
-- 👻 **Invisible Mode**: Use native `Text()` and `NSLocalizedString()` with zero code changes.
-- 📦 **1KB Core**: Minimal footprint, maximum performance.
-- 🧵 **Thread Safe**: Fully Swift 6 Concurrency compliant.
-- 🛡️ **Offline First**: Stale-while-revalidate caching logic.
-
-## Installation
+## 📦 Installation
 
 ### Swift Package Manager (SPM)
 
-1. In Xcode, go to **File** > **Add Packages...**
-2. Paste the URL: `https://github.com/shahwaiz90/ghoststrings-ios`
-3. Select **Up to Next Major Version** and click **Add Package**.
+1. In Xcode, go to **File > Add Packages...**
+2. Enter the repository URL: `https://github.com/shahwaiz90/ghoststrings-ios`
+3. Select the version (at least `1.1.3` for auto-refresh support).
 
-## Usage
+## 🛠️ Usage
 
 ### 1. Initialize the SDK
+
+In your `App` or `AppDelegate`:
 
 ```swift
 import GhostStrings
@@ -34,48 +30,42 @@ import GhostStrings
 struct MyApp: App {
     init() {
         GhostStrings.shared.initSDK(config: GhostStringsConfig(
-            apiKey: "your_project_key",
-            baseUrl: "https://your-server.com/api/"
+            projectId: "YOUR_PROJECT_ID",
+            baseUrl: "https://ghoststrings.ai",
+            debugMode: true
         ))
+    }
+    
+    var body: some Scene {
+        WindowGroup {
+            // Use the Provider for automatic OTA refreshes
+            GhostStringsProvider {
+                ContentView()
+            }
+        }
     }
 }
 ```
 
-### 2. Pick Your Integration Mode
+### 2. Native Integration
 
-| Mode | Usage | Best For |
-| :--- | :--- | :--- |
-| **Invisible** | `Text("welcome_key")` | Legacy projects & standard native feeling. |
-| **Reactive** | `GhostText("welcome_key")` | Real-time updates while the user is on-screen. |
+Just use standard iOS localization methods. GhostStrings intercepts these automatically!
 
-#### Invisible Mode (Standard SwiftUI)
-Because GhostStrings swizzles the native localization system, you can use standard SwiftUI components without any changes:
-
+#### SwiftUI
 ```swift
-// This automatically pulls from the cloud!
-Text("welcome_title")
+Text(NSLocalizedString("hero_title", 
+                       value: "The Invisible String.", // Native fallback
+                       comment: ""))
 ```
 
-#### Reactive Mode (GhostText)
-Use `GhostText` if you want the UI to update **instantly** without a view reload when a background sync completes:
-
-```swift
-GhostText("welcome_title")
+#### Objective-C
+```objectivec
+UILabel *label = [[UILabel alloc] init];
+label.text = NSLocalizedString(@"hero_title", @"comment");
 ```
 
-## Pull to Refresh
+## 🔄 Automatic Refresh
+By wrapping your root view in `GhostStringsProvider`, any changes you make in the GhostStrings dashboard will appear **instantly** in the app as soon as the sync completes—no code required in your subviews!
 
-To allow users to manually fetch the latest content:
-
-```swift
-ScrollView {
-    // Content
-}
-.refreshable {
-    await GhostStrings.shared.sync()
-}
-```
-
-## License
-
-GhostStrings is available under the MIT license. See the LICENSE file for more info.
+## 📄 License
+MIT License
