@@ -7,7 +7,7 @@ internal class GhostStringsRepository {
 
     private let lastModifiedKey = "com.ghoststrings.last_modified"
 
-    func saveStrings(_ strings: [String: String], lastModified: String? = null) {
+    func saveStrings(_ strings: [String: String], lastModified: String? = nil) {
         defaults.set(strings, forKey: stringsKey)
         defaults.set(Date().timeIntervalSince1970, forKey: syncTimeKey)
         if let lastModified = lastModified {

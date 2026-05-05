@@ -7,7 +7,7 @@ internal class GhostStringsApi {
         self.config = config
     }
 
-    func fetchStrings(ifModifiedSince: String? = nil, lang: String? = null) async throws -> FetchResult {
+    func fetchStrings(ifModifiedSince: String? = nil, lang: String? = nil) async throws -> FetchResult {
         let language = lang ?? Locale.current.languageCode ?? "en"
         
         let urlString = config.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/ota/\(config.projectId)"
