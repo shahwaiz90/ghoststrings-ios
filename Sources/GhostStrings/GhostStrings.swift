@@ -19,6 +19,7 @@ public class GhostStrings: ObservableObject {
     private var config: GhostStringsConfig?
     private var api: GhostStringsApi?
     private let repository = GhostStringsRepository()
+    private var pollingTimer: Timer?
     
     /// Returns true if this is the first time the SDK has been launched on this device.
     public private(set) var isFirstLaunch: Bool = false
@@ -44,11 +45,10 @@ public class GhostStrings: ObservableObject {
             Bundle.swizzleLocalization()
         }
         
-        // Sync on launch
-        Task {
-            await sync()
-            trackEvent("ghost_app_identified")
-        }
+        // Start the Ghost Heartbeat (Background Polling)
+        self.startPolling()
+        
+        trackEvent("ghost_app_identified")
     }
     
     private func updateStrings(_ newStrings: [String: String]) {
@@ -102,17 +102,27 @@ public class GhostStrings: ObservableObject {
         }
     }
     
-    private func syncIfNeeded() {
-        guard let config = config else { return }
+    private func startPolling() {
+        pollingTimer?.invalidate()
+        let interval = config?.refreshIntervalSeconds ?? 300
         
-        let lastSync = repository.getLastSyncTime()
-        let now = Date().timeIntervalSince1970
+        // Initial sync
+        Task { await sync() }
         
-        if now - lastSync > config.refreshIntervalSeconds {
-            Task {
-                await sync()
-            }
+        // Periodic sync
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            Task { await self.sync() }
         }
+    }
+    
+    /// Stops the background polling.
+    public func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+    }
+
+    private func syncIfNeeded() {
+        // Now handled by startPolling()
     }
     
     private func trackEvent(_ eventName: String) {
