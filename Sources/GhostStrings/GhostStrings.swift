@@ -59,7 +59,9 @@ public class GhostStrings: ObservableObject {
         lock.unlock()
         
         Task { @MainActor in
-            self.strings = newStrings
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                self.strings = newStrings
+            }
             NotificationCenter.default.post(name: .GhostStringsDidUpdate, object: nil)
         }
     }
@@ -86,12 +88,14 @@ public class GhostStrings: ObservableObject {
             let result = try await api.fetchStrings(ifModifiedSince: lastModified)
             
             if result.isModified, let newStrings = result.strings {
+                if config?.debugMode == true { print("GhostStrings: New OTA content applied successfully.") }
                 self.lastModified = result.lastModified
                 // Update memory and cache
                 self.updateStrings(newStrings)
                 self.repository.saveStrings(newStrings, lastModified: result.lastModified)
                 self.trackEvent("ghost_sync_success")
             } else {
+                if config?.debugMode == true { print("GhostStrings: Content is up-to-date (304). No update needed.") }
                 // 304 Not Modified — just update sync timestamp
                 self.repository.saveStrings(self.threadSafeStrings, lastModified: lastModified)
                 self.trackEvent("ghost_sync_cached")

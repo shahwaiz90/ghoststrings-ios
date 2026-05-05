@@ -25,13 +25,20 @@ internal class GhostStringsApi {
         }
 
         if config.debugMode {
-            print("GhostStrings: Fetching from \(url.absoluteString)")
+            print("GhostStrings: [Request] GET \(url.absoluteString)")
+            if let ims = ifModifiedSince {
+                print("GhostStrings: [Header] If-Modified-Since: \(ims)")
+            }
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NSError(domain: "GhostStrings", code: 500, userInfo: [NSLocalizedDescriptionKey: "Server error"])
+        }
+
+        if config.debugMode {
+            print("GhostStrings: [Response] Status: \(httpResponse.statusCode)")
         }
 
         if httpResponse.statusCode == 304 {
