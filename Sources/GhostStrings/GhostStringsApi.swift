@@ -10,7 +10,7 @@ internal class GhostStringsApi {
     func fetchStrings(lang: String? = nil) async throws -> [String: String] {
         let language = lang ?? Locale.current.languageCode ?? "en"
         
-        var urlString = config.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/ota/\(config.apiKey)"
+        var urlString = config.baseUrl.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/ota/\(config.projectId)"
         
         var components = URLComponents(string: urlString)
         components?.queryItems = [URLQueryItem(name: "lang", value: language)]

@@ -5,7 +5,7 @@ final class GhostStringsTests: XCTestCase {
     func testLiveSync() async throws {
         let config = GhostStringsConfig(
             apiKey: "dk_5c22c59fc93e46e588fecb22",
-            baseUrl: "https://ghoststrings-787748748049.us-central1.run.app",
+            baseUrl: "https://ghoststrings.ai",
             debugMode: true
         )
         
