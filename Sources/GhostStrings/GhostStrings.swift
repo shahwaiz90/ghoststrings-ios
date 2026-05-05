@@ -1,6 +1,10 @@
 import Foundation
 import Combine
 
+extension Notification.Name {
+    public static let GhostStringsDidUpdate = Notification.Name("GhostStringsDidUpdate")
+}
+
 public class GhostStrings: ObservableObject {
     public static let shared = GhostStrings()
     
@@ -44,6 +48,7 @@ public class GhostStrings: ObservableObject {
         
         Task { @MainActor in
             self.strings = newStrings
+            NotificationCenter.default.post(name: .GhostStringsDidUpdate, object: nil)
         }
     }
 
