@@ -47,6 +47,7 @@ public class GhostStrings: ObservableObject {
         // Sync on launch
         Task {
             await sync()
+            trackEvent("ghost_app_identified")
         }
     }
     
@@ -117,9 +118,15 @@ public class GhostStrings: ObservableObject {
     private func trackEvent(_ eventName: String) {
         let cid = repository.getLastModified()?.hashValue.description ?? UUID().uuidString
         let pid = config?.projectId ?? "unknown"
-        let urlString = "https://www.google-analytics.com/g/collect?v=2&tid=G-8RCWG09F1R&cid=\(cid)&en=\(eventName)&ep.project_id=\(pid)"
         
-        guard let url = URL(string: urlString) else { return }
+        // Get App Metadata
+        let appId = Bundle.main.bundleIdentifier ?? "unknown"
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "unknown"
+        
+        let urlString = "https://www.google-analytics.com/g/collect?v=2&tid=G-8RCWG09F1R&cid=\(cid)&en=\(eventName)" +
+                        "&ep.project_id=\(pid)&ep.app_id=\(appId)&ep.app_name=\(appName)&ep.platform=ios"
+        
+        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? urlString) else { return }
         
         URLSession.shared.dataTask(with: url).resume()
     }
