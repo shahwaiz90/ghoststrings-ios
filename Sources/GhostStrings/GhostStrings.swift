@@ -129,3 +129,12 @@ public class GhostStrings: ObservableObject {
         URLSession.shared.dataTask(with: url).resume()
     }
 }
+
+// ─── String Extension for Developer Convenience ─────────────────────────────
+extension String {
+    /// Shorthand to get a localized string from GhostStrings.
+    /// Example: Text("hero_title".gs)
+    public var gs: String {
+        return GhostStrings.shared.get(self, NSLocalizedString(self, comment: ""))
+    }
+}
