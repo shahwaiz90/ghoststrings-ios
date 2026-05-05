@@ -21,7 +21,7 @@ extension Bundle {
     @objc func gs_localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
         // 1. Try to get from GhostStrings
         if self == Bundle.main {
-            if let gsValue = GhostStrings.shared.getSync(key) {
+            if let gsValue = GhostStrings.shared.getSyncInternal(key) {
                 return gsValue
             }
         }

@@ -48,7 +48,7 @@ public class GhostStrings: ObservableObject {
     }
 
     /// Internal sync access for swizzling
-    func getSync(_ key: String) -> String? {
+    func getSyncInternal(_ key: String) -> String? {
         lock.lock()
         defer { lock.unlock() }
         return threadSafeStrings[key]
