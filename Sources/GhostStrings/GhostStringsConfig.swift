@@ -9,7 +9,7 @@ public struct GhostStringsConfig {
 
     public init(
         projectId: String,
-        baseUrl: String = "https://ghoststrings.com/api/",
+        baseUrl: String = "https://api.ghoststrings.ai",
         refreshIntervalSeconds: TimeInterval = 3600,
         debugMode: Bool = false,
         enableAnimations: Bool = true

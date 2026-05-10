@@ -22,7 +22,7 @@ final class GhostStringsTests: XCTestCase {
         let config = GhostStringsConfig(apiKey: "test_key", debugMode: true)
         XCTAssertEqual(config.apiKey, "test_key")
         XCTAssertTrue(config.debugMode)
-        XCTAssertEqual(config.baseUrl, "https://ghoststrings.com/api/") // Default
+        XCTAssertEqual(config.baseUrl, "https://api.ghoststrings.ai") // Default
     }
     
     func testFallbackLogic() async {

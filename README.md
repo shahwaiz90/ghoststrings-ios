@@ -31,7 +31,7 @@ struct MyApp: App {
     init() {
         GhostStrings.shared.initSDK(config: GhostStringsConfig(
             projectId: "YOUR_PROJECT_ID",
-            baseUrl: "https://ghoststrings.ai",
+            baseUrl: "https://api.ghoststrings.ai",
             debugMode: true
         ))
     }
