@@ -4,32 +4,32 @@ import XCTest
 final class GhostStringsTests: XCTestCase {
     func testLiveSync() async throws {
         let config = GhostStringsConfig(
-            apiKey: "dk_5c22c59fc93e46e588fecb22",
+            projectId: "dk_5c22c59fc93e46e588fecb22",
             baseUrl: "https://ghoststrings.ai",
             debugMode: true
         )
         
-        await GhostStrings.shared.initSDK(config: config)
+        GhostStrings.shared.initSDK(config: config)
         await GhostStrings.shared.sync()
         
-        let title = await GhostStrings.shared.get("hero_title", "Fallback")
+        let title = GhostStrings.shared.get("hero_title", "Fallback")
         print("\nFetched Title: \(title)\n")
         
         XCTAssertNotEqual(title, "Fallback")
     }
     
     func testConfigInitialization() {
-        let config = GhostStringsConfig(apiKey: "test_key", debugMode: true)
-        XCTAssertEqual(config.apiKey, "test_key")
+        let config = GhostStringsConfig(projectId: "test_key", debugMode: true)
+        XCTAssertEqual(config.projectId, "test_key")
         XCTAssertTrue(config.debugMode)
         XCTAssertEqual(config.baseUrl, "https://api.ghoststrings.ai") // Default
     }
     
     func testFallbackLogic() async {
-        let config = GhostStringsConfig(apiKey: "test_key")
-        await GhostStrings.shared.initSDK(config: config)
+        let config = GhostStringsConfig(projectId: "test_key")
+        GhostStrings.shared.initSDK(config: config)
         
-        let value = await GhostStrings.shared.get("non_existent_key", "Default Value")
+        let value = GhostStrings.shared.get("non_existent_key", "Default Value")
         XCTAssertEqual(value, "Default Value")
     }
     
