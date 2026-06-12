@@ -3,9 +3,13 @@ import XCTest
 
 final class GhostStringsTests: XCTestCase {
     func testLiveSync() async throws {
+        // Clear cached keys to avoid old state/404s
+        UserDefaults.standard.removeObject(forKey: "com.ghoststrings.cached_strings")
+        UserDefaults.standard.removeObject(forKey: "com.ghoststrings.last_modified")
+
         let config = GhostStringsConfig(
             projectId: "dk_5c22c59fc93e46e588fecb22",
-            baseUrl: "https://ghoststrings.ai",
+            baseUrl: "https://api.ghoststrings.ai",
             debugMode: true
         )
         
@@ -41,5 +45,34 @@ final class GhostStringsTests: XCTestCase {
         let loaded = repo.getStrings()
         
         XCTAssertEqual(loaded["test_key"], "test_value")
+    }
+
+    func testSupportedLanguagesRetrieval() async throws {
+        let config = GhostStringsConfig(
+            projectId: "dk_5c22c59fc93e46e588fecb22",
+            baseUrl: "https://api.ghoststrings.ai",
+            debugMode: true
+        )
+        
+        GhostStrings.shared.initSDK(config: config)
+        let languages = await GhostStrings.shared.getSupportedLanguages(force: true)
+        
+        XCTAssertFalse(languages.isEmpty)
+        XCTAssertTrue(languages.contains(where: { $0.localeId == "en" }))
+    }
+
+    func testActiveLanguageSwitching() {
+        let config = GhostStringsConfig(projectId: "test_key")
+        GhostStrings.shared.initSDK(config: config)
+        
+        XCTAssertNil(GhostStrings.shared.getLanguage())
+        
+        let expectation = self.expectation(description: "Set language completes")
+        GhostStrings.shared.setLanguage("ur") { success in
+            XCTAssertEqual(GhostStrings.shared.getLanguage(), "ur")
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 5.0)
     }
 }

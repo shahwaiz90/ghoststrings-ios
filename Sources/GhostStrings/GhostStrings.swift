@@ -26,6 +26,8 @@ public class GhostStrings: ObservableObject {
     /// Returns true if this is the first time the SDK has been launched on this device.
     public private(set) var isFirstLaunch: Bool = false
     
+    private var activeLanguage: String?
+
     private init() {}
     
     /// Initializes the SDK with the provided configuration.
@@ -83,14 +85,84 @@ public class GhostStrings: ObservableObject {
         defer { lock.unlock() }
         return threadSafeStrings[key] ?? defaultValue
     }
+
+    // ── Language Switching API ───────────────────────────────────────────────
+
+    public func setLanguage(_ lang: String?, onComplete: ((Bool) -> Void)? = nil) {
+        let targetLang = (lang?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) ? nil : lang
+        self.activeLanguage = targetLang
+
+        // Reset lastModified timestamp when changing language to ensure fresh fetch if no cache
+        self.lastModified = nil
+
+        // Trigger sync
+        Task {
+            let success = await sync(force: true)
+            onComplete?(success)
+        }
+    }
+
+    public func getLanguage() -> String? {
+        return activeLanguage
+    }
+
+    /// Fetches the supported languages list dynamically from the server.
+    /// Uses local caching and background revalidation (stale-while-revalidate).
+    public func getSupportedLanguages(force: Bool = false) async -> [GhostLanguage] {
+        guard let api = api else { return [] }
+        let cachedLangs = repository.getLanguages()
+
+        if cachedLangs.isEmpty || force {
+            do {
+                let result = try await api.fetchLanguages(ifModifiedSince: force ? nil : repository.getLanguagesLastModified())
+                if result.isModified, let fetchedLangs = result.languages {
+                    repository.saveLanguages(fetchedLangs, lastModified: result.lastModified)
+                    return fetchedLangs
+                } else if !result.isModified {
+                    return cachedLangs
+                }
+            } catch {
+                // Return cached fallback on failure
+                return cachedLangs
+            }
+        } else {
+            // Background update (stale-while-revalidate)
+            Task {
+                do {
+                    let result = try await api.fetchLanguages(ifModifiedSince: repository.getLanguagesLastModified())
+                    if result.isModified, let fetchedLangs = result.languages {
+                        repository.saveLanguages(fetchedLangs, lastModified: result.lastModified)
+                    }
+                } catch {
+                    // Ignore background errors
+                }
+            }
+        }
+
+        return cachedLangs
+    }
+
+    /// Callback-friendly version of getSupportedLanguages for Objective-C / Swift non-async callers.
+    public func getSupportedLanguages(force: Bool = false, onComplete: @escaping ([GhostLanguage]) -> Void) {
+        Task {
+            let langs = await getSupportedLanguages(force: force)
+            onComplete(langs)
+        }
+    }
     
     /// Synchronizes the local strings with the GhostStrings cloud.
     /// This method is called automatically on initialization, but can be triggered manually.
-    public func sync() async {
-        guard let api = api else { return }
+    @discardableResult
+    public func sync(force: Bool = false) async -> Bool {
+        return await sync(force: force, lang: activeLanguage)
+    }
+
+    @discardableResult
+    public func sync(force: Bool, lang: String?) async -> Bool {
+        guard let api = api else { return false }
         
         do {
-            let result = try await api.fetchStrings(ifModifiedSince: lastModified)
+            let result = try await api.fetchStrings(ifModifiedSince: force ? nil : lastModified, lang: lang)
             
             if result.isModified, let newStrings = result.strings {
                 if config?.debugMode == true { print("GhostStrings: New OTA content applied successfully.") }
@@ -99,17 +171,20 @@ public class GhostStrings: ObservableObject {
                 self.updateStrings(newStrings)
                 self.repository.saveStrings(newStrings, lastModified: result.lastModified)
                 self.trackEvent("ghost_sync_success")
+                return true
             } else {
                 if config?.debugMode == true { print("GhostStrings: Content is up-to-date (304). No update needed.") }
                 // 304 Not Modified — just update sync timestamp
                 self.repository.saveStrings(self.threadSafeStrings, lastModified: lastModified)
                 self.trackEvent("ghost_sync_cached")
+                return true
             }
             
         } catch {
             if config?.debugMode == true {
                 print("GhostStrings: Sync failed - \(error)")
             }
+            return false
         }
     }
     
