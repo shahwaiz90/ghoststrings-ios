@@ -15,7 +15,7 @@ The "Invisible String" for your iOS apps. GhostStrings allows you to update your
 
 1. In Xcode, go to **File > Add Packages...**
 2. Enter the repository URL: `https://github.com/shahwaiz90/ghoststrings-ios`
-3. Select the version (at least `1.1.3` for auto-refresh support).
+3. Select the version (at least `1.4.1` for auto-refresh and language support).
 
 ## 🛠️ Usage
 
